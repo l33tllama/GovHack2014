@@ -48,19 +48,7 @@
 		<div id='map'></div>
 
 		<script>
-			var data = {
-				resource_id: 'e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3', // the resource id
-				limit: 5, // get 5 results
-				//q: 'SEVERITY:Fatal' // query for 'jones'
-			};
-			$.ajax({
-				url: 'http://data.gov.au/api/action/datastore_search',
-				data: data,
-				dataType: 'jsonp',
-				success: function(data) {
-				alert('Total results found: ' + data.result.total)
-				}
-			});
+			
 			var map = L.mapbox.map('map', 'l33tllama.iobd4k95')
 			.setView([29, -26], 2);
 
@@ -81,6 +69,19 @@
 			}, 50);
 
 			marker.addTo(map);
+			var data = {
+				resource_id: 'e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3', // the resource id
+				limit: 5, // get 5 results
+				//q: 'SEVERITY:Fatal' // query for 'jones'
+			};
+			$.ajax({
+				url: 'http://data.gov.au/api/action/datastore_search',
+				data: data,
+				dataType: 'jsonp',
+				success: function(data) {
+				alert('Total results found: ' + data.result.total)
+				}
+			});
 		</script>
 	</div>
 	</body>
