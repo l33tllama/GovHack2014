@@ -1,7 +1,8 @@
-<php
-$title = "GovHack Stuff";
-?>
 <!DOCTYPE HTML>
+<php
+	$title = "GovHack Stuff";
+	$b = "lol";
+?>
 <html>
 	<head>
 		<title><?php echo $title; ?></title>
@@ -22,7 +23,7 @@ $title = "GovHack Stuff";
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="brand" href="#">e</a>
+			<a class="brand" href="#"><?php echo $title; ?></a>
 			<div class="nav-collapse collapse">
 				<ul class="nav">
 				<li class="active"><a href="#">Home</a></li>
@@ -40,4 +41,3 @@ $title = "GovHack Stuff";
 	</div>
 	</body>
 </html>
-<?php
