@@ -1,7 +1,10 @@
+<php
+$title = "GovHack Stuff";
+?>
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>GovHack 2014 Testing</title>
+		<title><?php echo $title; ?></title>
 		<link href="css/bootstrap.css" rel="stylesheet">
 		<style>
 		body {
@@ -19,7 +22,7 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="brand" href="#">Project name</a>
+			<a class="brand" href="#">e</a>
 			<div class="nav-collapse collapse">
 				<ul class="nav">
 				<li class="active"><a href="#">Home</a></li>
