@@ -17,6 +17,10 @@
 			body { margin:0; padding:0; }
 			#map { position:absolute; top:0; bottom:0; width:100%; }
 		</style>
+		
+		
+	</head>
+	<body>
 		<script>
 			var data = {
 					resource_id: 'e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3', // the resource id
@@ -29,13 +33,10 @@
 				dataType: 'jsonp',
 				success: function(data) {
 				//alert('Total results found: ' + data.result.total)
-				
+				console.log("Total results: " + data.result.total);
 				}
 			});
 		</script>
-		
-	</head>
-	<body>
 		<div class="navbar navbar-inverse navbar-fixed-top">
 			<div class="navbar-inner">
 				<div class="container">
