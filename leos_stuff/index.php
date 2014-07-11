@@ -27,13 +27,12 @@
     <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/proj4js/2.2.1/proj4-src.js"></script>
     <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
-    <script src="js/map_overlay.js"></script>
 
 
     <script>
         var map;
         var markers = [];
-        //var frequencies;
+        var frequencies;
     
         function getCircle(colour, size) {
           return {
@@ -59,7 +58,7 @@
         }
 
         function getFrequency(id){
-            //return frequencies[id];
+            return frequencies[id];
         }
 
         
@@ -68,7 +67,7 @@
             console.log('loadData called with ' + month);
 
             var data = {
-               sql: 'SELECT \"ID\",count(*),\"CRASH_DATE\",\"CRASH_TIME\",max(\"SEVERITY\") AS severity,max(\"DCA\")AS dca,max(\"X\")AS x,max(\"Y\")AS y from \"e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3\" WHERE \"CRASH_DATE\" LIKE \'2013-' + month + '%\' GROUP BY \"ID\",\"CRASH_DATE\",\"CRASH_TIME\" ORDER BY \"CRASH_TIME\"'
+                sql: 'SELECT * FROM \"e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3\" WHERE \"CRASH_DATE\" LIKE \'2013-' + month + '%\''
             };
             
             $.ajax({
@@ -76,23 +75,23 @@
                 data: data,
                 dataType: 'jsonp',
                 success: function(data) {
-                console.log('successfull ajax');
+
                 var fromProj = "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"; 
                 var toProj = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
-                //frequencies = {};
+                frequencies = {};
                 var results = data.result.records;
                 
-                //for (var i = 0; i < results.length; i++) {
-                //    id = results[i].ID;
-                //    if (id in frequencies) {
-                //        frequencies[id] += 1;
-                //    } else {
-                //        frequencies[id] = 1;
-                //    }
-                //}
+                for (var i = 0; i < results.length; i++) {
+                    id = results[i].ID;
+                    if (id in frequencies) {
+                        frequencies[id] += 1;
+                    } else {
+                        frequencies[id] = 1;
+                    }
+                }
                 
-                //console.log(frequencies);
+                console.log(frequencies);
 
                 console.log(results.length + ' records found');
 
@@ -101,8 +100,8 @@
                 }
 
                 for (var i = 0; i < results.length; i++) {
-                    var x = results[i].x;
-                    var y = results[i].y;
+                    var x = results[i].X;
+                    var y = results[i].Y;
                     //alert(x + ", " + y);
 
                     var coords = new proj4(fromProj, toProj, [x,y]);   //any object will do as long as it has 'x' and 'y' properties
@@ -111,14 +110,14 @@
                     var latLng = new google.maps.LatLng(coords[1],coords[0]);
                     
                     //alert(map);
-//
-                    colour = getSeverity(results[i].severity);
-                    size = parseInt(results[i].count) + 4;
+
+                    colour = getSeverity(results[i].SEVERITY);
+                    size = getFrequency(results[i].ID) + 7;
 
                     var marker = new google.maps.Marker({
                         position: latLng,
                         map: map,
-                        title: 'Description: ' + results[i].dca + '\n' + 'Severity: ' + results[i].severity + '\n' + 'No of Vehicles: ' + results[i].count,
+                        title: 'Description: ' + results[i].DCA + '\n' + 'Severity: ' + results[i].SEVERITY + '\n' + 'No of Vehicles: ' + getFrequency(results[i].ID),
                         icon: getCircle(colour, size)
                     });
                     //marker.setMap(null);
@@ -148,6 +147,7 @@
                 value:0,
                 min: 1,
                 max: 12,
+                range: true,
                 step: 1,
                 slide: function( event, ui ) {
                     console.log(ui.value);
@@ -176,7 +176,11 @@
   </head>
   <body>
     <div id="map-canvas"></div>
-<div id="slider"></div>
+    <div id="controls">
+		<div id="years"></div>
+		<div id="slider"></div>
+    </div>
+	
   </body>
 </html>
 
