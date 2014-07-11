@@ -33,6 +33,13 @@
 				<span class="icon-bar"></span>
 			</button>
 			<a class="brand" href="#"><?php echo $title; ?></a>
+			    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+					<li><a tabindex="-1" href="#">Action</a></li>
+					<li><a tabindex="-1" href="#">Another action</a></li>
+					<li><a tabindex="-1" href="#">Something else here</a></li>
+					<li class="divider"></li>
+					<li><a tabindex="-1" href="#">Separated link</a></li>
+				</ul>
 			<!--<div class="nav-collapse collapse">
 				<ul class="nav">
 				<li class="active"><a href="#">Home</a></li>
@@ -79,7 +86,8 @@
 				data: data,
 				dataType: 'jsonp',
 				success: function(data) {
-				alert('Total results found: ' + data.result.total)
+				//alert('Total results found: ' + data.result.total)
+				
 				}
 			});
 		</script>
