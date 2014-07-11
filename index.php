@@ -50,44 +50,42 @@ $title="GovHack 2014";
 						<span class="icon-bar"></span>
 					</button>
 					<a class="brand" href="#">GovHack Stuff</a>
-				<!--<div class="nav-collapse collapse">
-					<ul class="nav">
-					<li class="active"><a href="#">Home</a></li>
-					<li><a href="#about">About</a></li>
-					<li><a href="#contact">Contact</a></li>
-					</ul>
-				</div><!--/.nav-collapse -->
 				</div>
 			</div>
 		</div>
+	    <div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span2">
+				<!--Sidebar content-->
+				</div>
+				<div class="span10">
+					<div id='map'></div>
+					<script>
+				
+					var map = L.mapbox.map('map', 'l33tllama.iobd4k95')
+					.setView([29, -26], 2);
 
-	<div class="container">
-		<div id='map'></div>
+					var marker = L.marker([-73, 40], {
+						icon: L.mapbox.marker.icon({
+						'marker-color': '#f86767'
+						})
+					});
 
-		<script>
-			
-			var map = L.mapbox.map('map', 'l33tllama.iobd4k95')
-			.setView([29, -26], 2);
+					var t = 0;
+					window.setInterval(function() {
+						// Making a lissajous curve just for fun.
+						// Create your own animated path here.
+						marker.setLatLng(L.latLng(
+							Math.cos(t * 0.5) * 50,
+							Math.sin(t) * 50));
+						t += 0.1;
+					}, 50);
 
-			var marker = L.marker([-73, 40], {
-				icon: L.mapbox.marker.icon({
-				'marker-color': '#f86767'
-				})
-			});
-
-			var t = 0;
-			window.setInterval(function() {
-				// Making a lissajous curve just for fun.
-				// Create your own animated path here.
-				marker.setLatLng(L.latLng(
-					Math.cos(t * 0.5) * 50,
-					Math.sin(t) * 50));
-				t += 0.1;
-			}, 50);
-
-			marker.addTo(map);
-			
-		</script>
-	</div>
+					marker.addTo(map);
+					
+					</script>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
