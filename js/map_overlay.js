@@ -1,5 +1,5 @@
 function carOverlay(colour, bounds, image, map){
-	this.colour_ = colour;
+	this.colour__ = colour;
 	this.bounds_ = bounds;
 	this.map_ = map;
 

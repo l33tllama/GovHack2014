@@ -93,7 +93,7 @@
                 //}
                 
                 //console.log(frequencies);
-
+				
                 console.log(results.length + ' records found');
 
                 for (var i = 0; i < markers.length; i++) {
@@ -114,7 +114,14 @@
 //
                     colour = getSeverity(results[i].severity);
                     size = parseInt(results[i].count) + 4;
+                    
+                    var swBound = latLng;
+					var neBound = latLng;
+					var bounds = new google.maps.LatLngBounds(swBound, neBound);
 
+					
+					var testCarOverlay = new carOverlay("#FFBBBB", bounds, null, map);
+					
                     var marker = new google.maps.Marker({
                         position: latLng,
                         map: map,
@@ -176,7 +183,7 @@
   </head>
   <body>
     <div id="map-canvas"></div>
-<div id="slider"></div>
+	<div id="slider"></div>
   </body>
 </html>
 
