@@ -14,8 +14,8 @@
 		</style>
 		<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 		<script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.4/mapbox.js'></script>
-		<script src='css/jquery-1.11.1.min.js'></script>
-		<script src='css/bootstrap.js'></script>
+		<script src='js/jquery-1.11.1.min.js'></script>
+		<script src='js/bootstrap.js'></script>
 		<!-- <link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.4/mapbox.css' rel='stylesheet' /> -->
 		<style>
 			body { margin:0; padding:0; }
