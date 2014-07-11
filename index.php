@@ -119,7 +119,7 @@
 					var neBound = latLng;
 					var bounds = new google.maps.LatLngBounds(swBound, neBound);
 
-					var testImage = "img/crash.png";
+					var testImage = "./img/crash.png";
 					var testCarOverlay = new carOverlay("#FFBBBB", bounds, testImage, map);
 					
                     var marker = new google.maps.Marker({
