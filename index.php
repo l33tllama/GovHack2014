@@ -32,7 +32,7 @@
     <script>
         var map;
         var markers = [];
-        var frequencies;
+        //var frequencies;
     
         function getCircle(colour, size) {
           return {
@@ -58,7 +58,7 @@
         }
 
         function getFrequency(id){
-            return frequencies[id];
+            //return frequencies[id];
         }
 
         
@@ -67,7 +67,7 @@
             console.log('loadData called with ' + month);
 
             var data = {
-                sql: 'SELECT * FROM \"e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3\" WHERE \"CRASH_DATE\" LIKE \'2013-' + month + '%\''
+               sql: 'SELECT \"ID\",count(*),\"CRASH_DATE\",\"CRASH_TIME\",max(\"SEVERITY\") AS severity,max(\"DCA\")AS dca,max(\"X\")AS x,max(\"Y\")AS y from \"e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3\" WHERE \"CRASH_DATE\" LIKE \'2013-' + month + '%\' GROUP BY \"ID\",\"CRASH_DATE\",\"CRASH_TIME\" ORDER BY \"CRASH_TIME\"'
             };
             
             $.ajax({
@@ -75,23 +75,23 @@
                 data: data,
                 dataType: 'jsonp',
                 success: function(data) {
-
+                console.log('successfull ajax');
                 var fromProj = "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"; 
                 var toProj = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
-                frequencies = {};
+                //frequencies = {};
                 var results = data.result.records;
                 
-                for (var i = 0; i < results.length; i++) {
-                    id = results[i].ID;
-                    if (id in frequencies) {
-                        frequencies[id] += 1;
-                    } else {
-                        frequencies[id] = 1;
-                    }
-                }
+                //for (var i = 0; i < results.length; i++) {
+                //    id = results[i].ID;
+                //    if (id in frequencies) {
+                //        frequencies[id] += 1;
+                //    } else {
+                //        frequencies[id] = 1;
+                //    }
+                //}
                 
-                console.log(frequencies);
+                //console.log(frequencies);
 
                 console.log(results.length + ' records found');
 
@@ -100,8 +100,8 @@
                 }
 
                 for (var i = 0; i < results.length; i++) {
-                    var x = results[i].X;
-                    var y = results[i].Y;
+                    var x = results[i].x;
+                    var y = results[i].y;
                     //alert(x + ", " + y);
 
                     var coords = new proj4(fromProj, toProj, [x,y]);   //any object will do as long as it has 'x' and 'y' properties
@@ -110,14 +110,14 @@
                     var latLng = new google.maps.LatLng(coords[1],coords[0]);
                     
                     //alert(map);
-
-                    colour = getSeverity(results[i].SEVERITY);
-                    size = getFrequency(results[i].ID) + 7;
+//
+                    colour = getSeverity(results[i].severity);
+                    size = parseInt(results[i].count) + 4;
 
                     var marker = new google.maps.Marker({
                         position: latLng,
                         map: map,
-                        title: 'Description: ' + results[i].DCA + '\n' + 'Severity: ' + results[i].SEVERITY + '\n' + 'No of Vehicles: ' + getFrequency(results[i].ID),
+                        title: 'Description: ' + results[i].dca + '\n' + 'Severity: ' + results[i].severity + '\n' + 'No of Vehicles: ' + results[i].count,
                         icon: getCircle(colour, size)
                     });
                     //marker.setMap(null);
