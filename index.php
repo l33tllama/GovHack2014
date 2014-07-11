@@ -1,6 +1,10 @@
 <!DOCTYPE HTML>
+<?
+$title="GovHack 2014";
+?>
 <html>
 	<head>
+		<meta charset=utf-8 />
 		<title>GovHack Stuff</title>
 		<link href="css/bootstrap.css" rel="stylesheet">
 		<style>
@@ -62,7 +66,7 @@
 
 		<script>
 			
-			var map = L.mapbox.map('map', 'examples.map-h67hf2ic')
+			var map = L.mapbox.map('map', 'l33tllama.iobd4k95')
 			.setView([29, -26], 2);
 
 			var marker = L.marker([-73, 40], {
