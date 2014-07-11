@@ -31,6 +31,7 @@
 
     <script>
         var map;
+        var markers = [];
         var frequencies;
     
         function getCircle(colour, size) {
@@ -60,9 +61,13 @@
             return frequencies[id];
         }
 
-        function loadData(position) {
+        
+
+        function loadData(month) {
+            console.log('loadData called with ' + month);
+
             var data = {
-                sql: 'SELECT * FROM \"e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3\" WHERE \"CRASH_DATE\" LIKE \'' + position + '%\''
+                sql: 'SELECT * FROM \"e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3\" WHERE \"CRASH_DATE\" LIKE \'2013-' + month + '%\''
             };
             
             $.ajax({
@@ -90,6 +95,10 @@
 
                 console.log(results.length + ' records found');
 
+                for (var i = 0; i < markers.length; i++) {
+                    markers[i].setMap(null);
+                }
+
                 for (var i = 0; i < results.length; i++) {
                     var x = results[i].X;
                     var y = results[i].Y;
@@ -111,8 +120,9 @@
                         title: 'Description: ' + results[i].DCA + '\n' + 'Severity: ' + results[i].SEVERITY + '\n' + 'No of Vehicles: ' + getFrequency(results[i].ID),
                         icon: getCircle(colour, size)
                     });
-                    /*marker.setMap(null);
+                    //marker.setMap(null);
                     markers.push(marker);
+                    /*
 
                     function nextMarker(mkNum){
                         if (mkNum <= markers.length) {;
@@ -131,18 +141,18 @@
             
         }
 
-        function initialize() {
-
-        }
 
          $(function() {
             $( "#slider" ).slider({
                 value:0,
-                min: 2004,
-                max: 2014,
+                min: 1,
+                max: 12,
                 step: 1,
                 slide: function( event, ui ) {
-                    loadData(ui.value);
+                    console.log(ui.value);
+                    var padded = ("0" + ui.value).slice (-2);
+                    console.log(padded);
+                    loadData(padded);
                 }
             });
           
@@ -155,7 +165,7 @@
 
             //var markers = [];
 
-            loadData(2004);
+            loadData("01");
         });
 
 
