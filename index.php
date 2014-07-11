@@ -1,91 +1,114 @@
-<!DOCTYPE HTML>
-<?
-$title="GovHack 2014";
-?>
+
+
+<!DOCTYPE html>
 <html>
-	<head>
-		<meta charset=utf-8 />
-		<title>GovHack Stuff</title>
-		<link href="css/bootstrap.css" rel="stylesheet">
-		<style>
-		body {
-			padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-		}
-		</style>
-		<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-		<script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.4/mapbox.js'></script>
-		<script src='js/jquery-1.11.1.min.js'></script>
-		<script src='js/bootstrap.js'></script>
-		<!-- <link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.4/mapbox.css' rel='stylesheet' /> -->
-		<style>
-			body { margin:0; padding:0; }
-			#map { position:absolute; top:0; bottom:0; width:100%; }
-		</style>
-		
-		
-	</head>
-	<body>
-		<script>
-			var data = {
-					resource_id: 'e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3', // the resource id
-					limit: 5, // get 5 results
-					//q: 'SEVERITY:Fatal' // query for 'jones'
-				};
-			$.ajax({
-				url: 'http://data.gov.au/api/action/datastore_search',
-				data: data,
-				dataType: 'jsonp',
-				success: function(data) {
-				//alert('Total results found: ' + data.result.total)
-				console.log("Total results: " + data.result.total);
-				}
-			});
-		</script>
-		<div class="navbar navbar-inverse navbar-fixed-top">
-			<div class="navbar-inner">
-				<div class="container">
-					<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-					</button>
-					<a class="brand" href="#">GovHack Stuff</a>
-				</div>
-			</div>
-		</div>
-	    <div class="container-fluid">
-			<div class="row-fluid">
-				<div class="span2">
-				<!--Sidebar content-->
-				</div>
-				<div class="span10">
-					<div id='map'></div>
-					<script>
-				
-					var map = L.mapbox.map('map', 'l33tllama.iobd4k95')
-					.setView([29, -26], 2);
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?libraries=visualization"></script>
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/proj4js/2.2.1/proj4-src.js"></script>
 
-					var marker = L.marker([-73, 40], {
-						icon: L.mapbox.marker.icon({
-						'marker-color': '#f86767'
-						})
-					});
 
-					var t = 0;
-					window.setInterval(function() {
-						// Making a lissajous curve just for fun.
-						// Create your own animated path here.
-						marker.setLatLng(L.latLng(
-							Math.cos(t * 0.5) * 50,
-							Math.sin(t) * 50));
-						t += 0.1;
-					}, 50);
+    <script>
+        var map;
+    
+        function getCircle(hexColour) {
+          return {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: hexColour,
+            fillOpacity: .8,
+            scale: 7,
+            strokeColor: 'white',
+            strokeWeight: .5
+          };
+        }
 
-					marker.addTo(map);
-					
-					</script>
-				</div>
-			</div>
-		</div>
-	</body>
+        function getSeverity(severity){
+            return {
+                'Unknown': '#ffffff',
+                'Property Damage Only': '#ff3333',
+                'First Aid': '#ff6666',
+                'Minor': '#ff3333',
+                'Serious': '#ff0000',
+                'Fatal': '#000000'
+            }[severity] ;
+        }
+
+
+
+        function initialize() {
+          var mapOptions = {
+            zoom: 7,
+            center: new google.maps.LatLng(-42, 147)
+          };
+          map = new google.maps.Map(document.getElementById('map-canvas'),
+              mapOptions);
+
+        var data = {
+            //resource_id: 'e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3', // the resource id
+            //limit: 999, // get 5 results
+            //q: 'traffic signals'
+            //sql: 'SELECT MAX(X), MAX(Y), MAX(SEVERITY), COUNT(ID) AS coincidence from \"e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3\" WHERE \"CRASH_DATE\" = \'2013-03-30T00:00:00\' GROUP BY coincidence'
+
+            sql: 'SELECT * FROM \"e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3\" WHERE \"CRASH_DATE\" = \'2013-03-30T00:00:00\''
+
+        };
+
+            $.ajax({
+            url: 'http://data.gov.au/api/action/datastore_search_sql',
+            data: data,
+            dataType: 'jsonp',
+            success: function(data) {
+
+                var fromProj = "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"; 
+                var toProj = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+
+                var results = data.result.records;
+
+                console.log(results.length + ' records found');
+
+                for (var i = 0; i < results.length; i++) {
+                    var x = results[i].X;
+                    var y = results[i].Y;
+                    //alert(x + ", " + y);
+
+                    var coords = new proj4(fromProj, toProj, [x,y]);   //any object will do as long as it has 'x' and 'y' properties
+                    //alert(coords[1] + ", " + coords[0]);
+
+                    var latLng = new google.maps.LatLng(coords[1],coords[0]);
+                    
+                    //alert(map);
+
+                    var marker = new google.maps.Marker({
+                        position: latLng,
+                        map: map,
+                        title: results[i].DCA,
+                        icon: getCircle(getSeverity(results[i].SEVERITY)) 
+                    });
+                }
+
+            }
+          });
+
+
+        }
+
+        google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+  </head>
+  <body>
+    <div id="map-canvas"></div>
+  </body>
 </html>
+
+
