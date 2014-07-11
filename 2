@@ -20,14 +20,13 @@
 
     <script>
         var map;
-        var frequencies;
     
-        function getCircle(colour, size) {
+        function getCircle(hexColour) {
           return {
             path: google.maps.SymbolPath.CIRCLE,
-            fillColor: colour,
+            fillColor: hexColour,
             fillOpacity: .8,
-            scale: size,
+            scale: 7,
             strokeColor: 'white',
             strokeWeight: .5
           };
@@ -43,10 +42,6 @@
                 'Serious': '#FF3333',
                 'Fatal': '#000000'
             }[severity] ;
-        }
-
-        function getFrequency(id){
-            return frequencies[id];
         }
 
         function initialize() {
@@ -70,12 +65,12 @@
                 var fromProj = "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"; 
                 var toProj = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
-                frequencies = {};
+                var frequencies = {};
                 var results = data.result.records;
                 
                 for (var i = 0; i < results.length; i++) {
                     id = results[i].ID;
-                    if (id in frequencies) {
+                    if (!id in frequencies) {
                         frequencies[id] += 1;
                     } else {
                         frequencies[id] = 1;
@@ -98,16 +93,13 @@
                     
                     //alert(map);
 
-                    colour = getSeverity(results[i].SEVERITY);
-                    size = getFrequency(results[i].ID) + 7;
-
                     var marker = new google.maps.Marker({
                         position: latLng,
                         map: map,
-                        title: 'Description: ' + results[i].DCA + '\n' + 'Severity: ' + results[i].SEVERITY + '\n' + 'No of Vehicles: ' + getFrequency(results[i].ID),
-                        icon: getCircle(colour, size)
+                        title: results[i].DCA + '\n' + results[i].SEVERITY,
+                        icon: getCircle(getSeverity(results[i].SEVERITY))
                     });
-                    //console.log(results[i].SEVERITY + "\n" + getSeverity(results[i].SEVERITY));
+                    console.log(results[i].SEVERITY + "\n" + getSeverity(results[i].SEVERITY));
                 }
 
             }
