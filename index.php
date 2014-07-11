@@ -51,7 +51,7 @@
 			var data = {
 				resource_id: 'e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3', // the resource id
 				limit: 5, // get 5 results
-				/q: 'SEVERITY:Fatal' // query for 'jones'
+				//q: 'SEVERITY:Fatal' // query for 'jones'
 			};
 			$.ajax({
 				url: 'http://data.gov.au/api/action/datastore_search',
