@@ -1,3 +1,4 @@
+carOverlay.prototype = new google.maps.OverlayView();
 function carOverlay(colour, bounds, image, map){
 	this.colour__ = colour;
 	this.bounds_ = bounds;
