@@ -1,6 +1,6 @@
 <!DOCTYPE HTML>
-<php
-	$title = "GovHack Stuff";
+<?
+	$title="GovHack Stuff";
 	$b = "lol";
 ?>
 <html>
