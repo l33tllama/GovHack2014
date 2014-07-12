@@ -1,5 +1,5 @@
 carOverlay.prototype = new google.maps.OverlayView();
-function carOverlay(colour, latLon, image_dims, image, map){
+function carOverlay(colour, latLon, image_dims, map, id){
 	this.color_ = colour;
 	this.image_dims_ = image_dims;
 	this.map_ = map;
@@ -9,9 +9,10 @@ function carOverlay(colour, latLon, image_dims, image, map){
 	this.div_ = null;
 	this.crashInfo = null;
 
-	this.setMap(map)
+	this.setMap(map);
+	this.id_ = id;
 }
-
+//
 carOverlay.prototype.onAdd = function() {
 	var div = document.createElement('div');
 	div.style.borderStyle = "none";
@@ -20,8 +21,11 @@ carOverlay.prototype.onAdd = function() {
 	//div.innerHTML = "le crash";
 	
 	var d3_div = d3.select(div).style({	
-		"opacity" : 0.75
-	});
+		"opacity" : 0.75,
+		"transition" : "visibility 0s 2s, opacity 2s linear"
+	}).attr({ 
+		"id":  this.id_});
+	d3_div.append("a").attr("href", "").text("link");
 	
 	this.crashInfo = d3_div.append("div").attr("class", "crashInfo").html("A crash! oh noes");
 	
@@ -56,14 +60,30 @@ carOverlay.prototype.onAdd = function() {
 		"cy" : this.image_dims_[1]/2,
 		"r" : this.image_dims_[2]/2
 	});
-	
+	//d3_div.style();
 
 	this.div_ = div;
+	jQuery(div).fadeIn();
+	
 
 	// Add the element to the "overlayLayer" pane.
 	var panes = this.getPanes();
 	
 	panes.overlayLayer.appendChild(div);
+	//var me = this.div_;
+	//jQuery(me).append("<a href=''>click</a>");
+	
+	var thatCrashInfo = this.crashInfo;
+	google.maps.event.addDomListener(this.div_, 'mouseover', function() {
+		console.log(this.id_ + "crash");
+		
+	});
+	/*
+	google.maps.event.addDomListener(this.div_, 'mouseout', function() {
+		console.log("Mouse out!");
+		thatCrashInfo.style("visibility", "hidden");
+		thatCrashInfo.attr("class", "hidden");
+	});*/
 	
 };
 
@@ -92,24 +112,18 @@ carOverlay.prototype.draw = function() {
 	div.style.top = y -height / 2 + 'px';
 	div.style.width = width + 'px';
 	div.style.height = height + 'px';
-	
-	var thatCrashInfo = this.crashInfo;
-	google.maps.event.addDomListener(this.div_, 'mouseover', function() {
-		console.log("Mouse over!");
-		thatCrashInfo.style("visibility", "visible");
-		thatCrashInfo.attr("class", "visible");
+	jQuery(this.div_).mouseover(function(){
+		alert("click");
+		jQuery(div).append("<div>A crash!!!</div>");
 	});
 	
-	google.maps.event.addDomListener(this.div_, 'mouseout', function() {
-		console.log("Mouse out!");
-		thatCrashInfo.style("visibility", "hidden");
-		thatCrashInfo.attr("class", "hidden");
-	});
 };
 
 carOverlay.prototype.onRemove = function() {
-	this.div_.parentNode.removeChild(this.div_);
-	this.div_ = null;
+	jQuery(this.div_).fadeOut(function(){
+		this.div_.parentNode.removeChild(this.div_);
+		this.div_ = null;
+	});
 };
 carOverlay.prototype.hide = function() {
 	if (this.div_) {

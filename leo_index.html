@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html>
   <head>
@@ -57,6 +55,20 @@
 	.crashDot:hover{
 		background-color: black;
 	}
+	    .marker-label,
+    .marker-icon {
+    z-index: 99;
+    position: absolute;
+    display: block;
+    margin-top: -50px;
+    margin-left: -25px;
+    width: 50px;
+    height: 50px;
+    font-size: 30px !important;
+    text-align: center;
+    color: #FFFFFF;
+    white-space: nowrap;
+    }
 
     </style>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
@@ -65,13 +77,17 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/proj4js/2.2.1/proj4-src.js"></script>
     <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <!--Not needed atm, maybe save for later if I cab be bothered getting it working <script src="js/map_overlay.js"></script>-->
+    <script src="js/map_overlay.js"></script>
     <script src="js/vectorMarkerAnimate.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/map-icons.css" />
+	<script src="js/map-icons.js"></script>
 
     <script>
+		window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                              window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
         var map;
         var markers = [];
-        //var frequencies;
+        var markers_added = 0;
     
         function getCircle(colour, size) {
           return {
@@ -100,8 +116,6 @@
             //return frequencies[id];
         }
 
-        
-
         function loadData(month) {
             console.log('loadData called with ' + month);
 
@@ -118,75 +132,115 @@
                 var fromProj = "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"; 
                 var toProj = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
-                //frequencies = {};
                 var results = data.result.records;
-                
-                //for (var i = 0; i < results.length; i++) {
-                //    id = results[i].ID;
-                //    if (id in frequencies) {
-                //        frequencies[id] += 1;
-                //    } else {
-                //        frequencies[id] = 1;
-                //    }
-                //}
-                
-                //console.log(frequencies);
-				
+  
                 console.log(results.length + ' records found');
+                
+                // Clear previous markers
+                for (var i = 0; i < markers.length; i++){
+					markers[i].setMap(null);
+				}
+				function getIconForSeverity(severity){
+					return {
+					'Not known': {
+									path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
+									scale: 1,
+									strokeColor: getSeverity(severity)
+								},
+					'Unknown': {
+									path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
+									scale: 1,
+									strokeColor: getSeverity(severity)
+								},
+					'Property Damage Only': {
+									path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
+									scale: 2,
+									strokeColor: getSeverity(severity)
+								},
+					'First Aid': {
+									path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
+									scale: 3,
+									strokeColor: getSeverity(severity)
+								},
+					'Minor': {
+									path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
+									scale: 3,
+									strokeColor: getSeverity(severity)
+								},
+					'Serious': {
+									path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
+									scale: 4,
+									strokeColor: getSeverity(severity)
+								},
+					'Fatal': "./img/crash.jpg"/*{
+									path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
+									scale: 6,
+									strokeColor: 
+								} */
+					}[severity] ;
+				}
+				
+				function addMarker(res){
+					//var res = results[i];
+					 x = res.x;
+                     y = res.y;
 
-                for (var i = 0; i < markers.length; i++) {
-                    markers[i].fadeOut({duration: 2000, complete: function() {
-						markers[i].setMap(null);
-                    }});
-                    
-                    
-                }
+                    coords = new proj4(fromProj, toProj, [x,y]);   //any object will do as long as it has 'x' and 'y' properties
 
-                for (var i = 0; i < results.length; i++) {
-                    var x = results[i].x;
-                    var y = results[i].y;
-                    //alert(x + ", " + y);
+                    latLng = new google.maps.LatLng(coords[1], coords[0]);
 
-                    var coords = new proj4(fromProj, toProj, [x,y]);   //any object will do as long as it has 'x' and 'y' properties
-                    //alert(coords[1] + ", " + coords[0]);
-
-                    var latLng = new google.maps.LatLng(coords[1],coords[0]);
-
-                    colour = getSeverity(results[i].severity);
-                    size = (parseInt(results[i].count) + 4);
-
-					// var testImage = "./img/crash.png";
-					// var testCarOverlay = new carOverlay(colour, latLng, [size, size, size], testImage, map);
-                    var marker = new google.maps.Marker({
-                        position: latLng,
-                        map: map,
-                        title: 'Description: ' + results[i].dca + '\n' + 'Severity: ' + results[i].severity + '\n' + 'No of Vehicles: ' + results[i].count,
-                        icon: getCircle(colour, size)
-                    });
-					marker.bindCircle({
+                    colour = getSeverity(res.severity);
+                    size = 5 * (parseInt(res.count) + 4);
+					
+					// create _clickable_ marker
+					var marker = new google.maps.Marker({
+						position: latLng,
 						map: map,
-						radius: 1000 * size,
+						draggable: false,
+						animation: google.maps.Animation.DROP,
+						icon: getIconForSeverity(res.severity),
+						label: '<i class="map-icon-parking"></i>'
+					});
+					
+					var infoContent = 'Description: ' + res.dca + '\n' + 'Severity: ' 
+                    + res.severity + '\n' + 'No of Vehicles: ' + res.count;
+                    
+                    var markerID = "marker_" + res.ID;
+					
+					var infowindow = new google.maps.InfoWindow({
+						content: infoContent
+					});
+                    google.maps.event.addListener(marker, 'click', function() {
+						infowindow.open(map,marker);
+					});
+					markers.push(marker);
+					//jQuery("#" + marker.get("id")).fadeOut():
+					markers_added++;
+				}
+
+                //TODO: drop markers with coloured shadow overlay
+                for (var i = 0; i < results.length; i++) {
+					//var testCarOverlay = new carOverlay(colour, latLng, [size, size, size], map, markerID);
+					var theResult = results[i]
+					setTimeout(addMarker, i * 50, theResult);
+					//console.log("#" + marker.get("id"));
+					//$("#" + markerID).hide();
+					//$(markerID).fadeIn('slow');
+					/*marker.bindCircle({
+						map: map,
+						radius: 500 * size,
 						strokeColor: "red",
 						strokeWeight: 1,
 						fillColor: colour,
 						fillOpacity: 0.5
 					});
+				
                     //marker.setMap(null);
-                    markers.push(marker);
-                    marker.fadeIn(map, {duration : 2000});
-                    /*
-
-                    function nextMarker(mkNum){
-                        if (mkNum <= markers.length) {;
-                            markers[mkNum].setMap(map);
-                            setTimeout(function() {
-                                //markers[mkNum].setMap(null);
-                                nextMarker(mkNum+1);
-                            }, 100);
-                        }
-                    }
-                    nextMarker(0);*/
-
+                    
+                    marker.fadeIn(map, {duration : 2000});*/
+                    //marker.className = "visible";
+                    //$(marker).fadeIn('slow');
+                    //markers.push(testCarOverlay);
                 }
             }
           });
@@ -220,7 +274,6 @@
             loadData("01");
         });
 
-
         //google.maps.event.addDomListener(window, 'load', initialize);
 
     </script>
@@ -228,6 +281,7 @@
   <body>
     <div id="map-canvas"></div>
 	<div id="slider"></div>
+	<i class="map-icon-parking"></i>
   </body>
 </html>
 
