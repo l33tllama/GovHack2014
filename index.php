@@ -7,6 +7,9 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <style>
+    * {
+        font-family: san-serif;
+    }
       html, body, #map-canvas {
         margin: 0px;
         padding: 0px
@@ -59,6 +62,7 @@
 	}
 
     </style>
+
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
     <script src="https://maps.googleapis.com/maps/api/js?libraries=visualization"></script>
     <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
@@ -96,17 +100,18 @@
             }[severity] ;
         }
 
-        function getFrequency(id){
-            //return frequencies[id];
+        function getDays(year){
+            
         }
-
         
 
         function loadData(month) {
-            console.log('loadData called with ' + month);
+            var year = $('#year').val();
+
+            console.log('loadData called with ' + year + ', ' + month);
 
             var data = {
-               sql: 'SELECT \"ID\",count(*),\"CRASH_DATE\",\"CRASH_TIME\",max(\"SEVERITY\") AS severity,max(\"DCA\")AS dca,max(\"X\")AS x,max(\"Y\")AS y from \"e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3\" WHERE \"CRASH_DATE\" LIKE \'2013-' + month + '%\' GROUP BY \"ID\",\"CRASH_DATE\",\"CRASH_TIME\" ORDER BY \"CRASH_TIME\"'
+               sql: 'SELECT \"ID\",count(*),\"CRASH_DATE\",\"CRASH_TIME\",max(\"SEVERITY\") AS severity,max(\"DCA\")AS dca,max(\"X\")AS x,max(\"Y\")AS y from \"e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3\" WHERE \"CRASH_DATE\" LIKE \'' + year + '-' + month + '%\' GROUP BY \"ID\",\"CRASH_DATE\",\"CRASH_TIME\" ORDER BY \"CRASH_TIME\"'
             };
             
             $.ajax({
@@ -135,7 +140,7 @@
                 console.log(results.length + ' records found');
 
                 for (var i = 0; i < markers.length; i++) {
-                    markers[i].fadeOut({duration: 2000, complete: function() {
+                    markers[i].fadeOut({duration: 3000, complete: function() {
 						markers[i].setMap(null);
                     }});
                     
@@ -165,15 +170,16 @@
                     });
 					marker.bindCircle({
 						map: map,
-						radius: 1000 * size,
-						strokeColor: "red",
+						radius: 800 * size,
+						strokeColor: "white",
 						strokeWeight: 1,
+                        //title: 'Description: ' + results[i].dca + '\n' + 'Severity: ' + results[i].severity + '\n' + 'No of Vehicles: ' + results[i].count,
 						fillColor: colour,
-						fillOpacity: 0.5
+						fillOpacity: 0.8
 					});
                     //marker.setMap(null);
                     markers.push(marker);
-                    marker.fadeIn(map, {duration : 2000});
+                    marker.fadeIn(map, {duration : 3000});
                     /*
 
                     function nextMarker(mkNum){
@@ -196,7 +202,7 @@
 
          $(function() {
             $( "#slider" ).slider({
-                value:0,
+                value:1,
                 min: 1,
                 max: 12,
                 step: 1,
@@ -226,6 +232,21 @@
     </script>
   </head>
   <body>
+    <div id="toolbar" style="padding:5px; background-color:#cccccc">
+        <label for="year" style="font-family: sans-serif">Select a year to view</label>
+        <select id="year" name="year" onchange="loadData('01');">
+            <option>2004</option>
+            <option>2005</option>
+            <option>2006</option>
+            <option>2007</option>
+            <option>2008</option>
+            <option>2009</option>
+            <option>2010</option>
+            <option>2011</option>
+            <option>2012</option>
+            <option selected="selected">2013</option>
+        </select>
+    </div>
     <div id="map-canvas"></div>
 	<div id="slider"></div>
   </body>
