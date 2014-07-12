@@ -92,11 +92,11 @@
 
         function getSeverity(severity){
             return {
-                '1': '#FFBBBB',
-                '2': '#FF9999',
-                '3': '#FF7777',
-                '4': '#FF5555',
-                '5': '#FF3333',
+                '1': '#FF9999',
+                '2': '#FF7777',
+                '3': '#FF5555',
+                '4': '#FF3333',
+                '5': '#FF1111',
                 '6': '#000000'
             }[severity] ;
         }
@@ -117,12 +117,18 @@
                 data: data,
                 dataType: 'json',
                 success: function(data) {
-                    console.log('successful ajax');
+                    //console.log('successful ajax');
 
                     //frequencies = {};
                     all_results = data.result.records;
 
-                    console.log(all_results.length + ' records found for this year');
+                    //console.log(all_results.length + ' records found for this year');
+                    index = 1;
+                    //console.log('Slider moved to ' + index);
+
+                    $("#slider").slider("value", index); 
+                    loadDay(index);
+                    
                 }
             });   
             
@@ -134,7 +140,7 @@
 
             var results = [];
 
-            console.time('selectingDay');
+            //console.time('selectingDay');
             for (var i = 0; i < all_results.length; i++) {
                 var t = all_results[i].dt.split("-");
                 var d = new Date(t[0], t[1]-1, t[2]);
@@ -143,9 +149,9 @@
                     results.push(all_results[i]); 
                 }
             }
-            console.timeEnd('selectingDay');
+            //console.timeEnd('selectingDay');
 
-                console.log(results.length + ' matching records found');
+                //console.log(results.length + ' matching records found');
 
                 for (var i = 0; i < markers.length; i++) {
                     markers[i].fadeOut({duration: 3000, complete: function() {
@@ -216,7 +222,7 @@
                 slide: function( event, ui ) {
                     //console.log(ui.value);
                     //var padded = ("0" + ui.value).slice (-2);
-                    console.log('Slider moved to ' + ui.value);
+                    //console.log('Slider moved to ' + ui.value);
                     loadDay(ui.value);
                 }
             });
@@ -239,21 +245,20 @@
             moveSlider(index);
 
             function moveSlider(i){
+                
                 $("#slider").slider("value", i); 
+                loadDay(i+1);
+                //console.log('Slider moved to ' + i+1);
+
                 setTimeout(function() {
-                    if (i > 367 || cancel_timer) {
-                        cancel_timer = false;
-                        return;
+                    if (i > 367) {
+                        i = 1;
+                        index = 1;
                     }
                     moveSlider(i+1);
-                    console.log('Slider moved to ' + i+1);
-                    loadDay(i+1);
                 }, 200);
             }
-
- 
         });
-
 
         //google.maps.event.addDomListener(window, 'load', initialize);
 
@@ -262,7 +267,7 @@
   <body>
     <div id="toolbar" style="padding:5px; background-color:#cccccc">
         <label for="year" style="font-family: sans-serif">Select a year to view</label>
-        <select id="year" name="year" onchange="cancel_timer=true; loadDay(1);">
+        <select id="year" name="year" onchange="loadYear(this.selectedText);">
             <option>2004</option>
             <option>2005</option>
             <option>2006</option>
