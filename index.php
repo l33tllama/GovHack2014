@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Simple Map</title>
+    <title>Crash Data</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <style>
@@ -75,7 +75,7 @@
     <script>
         var map;
         var markers = [];
-        //var frequencies;
+        var all_results = [];
     
         function getCircle(colour, size) {
           return {
@@ -90,82 +90,89 @@
 
         function getSeverity(severity){
             return {
-                'Not known': '#FFBBBB',
-                'Unknown': '#FFBBBB',
-                'Property Damage Only': '#FF9999',
-                'First Aid': '#FF7777',
-                'Minor': '#FF5555',
-                'Serious': '#FF3333',
-                'Fatal': '#000000'
+                '1': '#FFBBBB',
+                '2': '#FF9999',
+                '3': '#FF7777',
+                '4': '#FF5555',
+                '5': '#FF3333',
+                '6': '#000000'
             }[severity] ;
         }
+    
+        Date.prototype.getDOY = function() { var onejan = new Date(this.getFullYear(),0,1); return Math.ceil((this - onejan) / 86400000); }
 
-        function getDays(year){
-            
-        }
-        
+      
 
-        function loadData(month) {
+        function loadYear(){
             var year = $('#year').val();
+            console.log('loadYear called with ' + year);
 
-            console.log('loadData called with ' + year + ', ' + month);
-
-            var data = {
-               sql: 'SELECT \"ID\",count(*),\"CRASH_DATE\",\"CRASH_TIME\",max(\"SEVERITY\") AS severity,max(\"DCA\")AS dca,max(\"X\")AS x,max(\"Y\")AS y from \"e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3\" WHERE \"CRASH_DATE\" LIKE \'' + year + '-' + month + '%\' GROUP BY \"ID\",\"CRASH_DATE\",\"CRASH_TIME\" ORDER BY \"CRASH_TIME\"'
-            };
+            var data = {};
             
             $.ajax({
-                url: 'http://data.gov.au/api/action/datastore_search_sql',
+                //url: 'http://data.gov.au/api/action/datastore_search_sql',
+                url: 'http://localhost/GovHack2014/'+year+'.json',
                 data: data,
-                dataType: 'jsonp',
+                dataType: 'json',
                 success: function(data) {
-                console.log('successfull ajax');
-                var fromProj = "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"; 
-                var toProj = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+                    console.log('successful ajax');
 
-                //frequencies = {};
-                var results = data.result.records;
-                
-                //for (var i = 0; i < results.length; i++) {
-                //    id = results[i].ID;
-                //    if (id in frequencies) {
-                //        frequencies[id] += 1;
-                //    } else {
-                //        frequencies[id] = 1;
-                //    }
-                //}
-                
-                //console.log(frequencies);
-				
-                console.log(results.length + ' records found');
+                    //frequencies = {};
+                    all_results = data.result.records;
+
+                    console.log(all_results.length + ' records found for this year');
+                }
+            });   
+            
+        }
+
+        function loadDay(day_of_year) {
+
+            console.log('loadDay called with ' + day_of_year);
+
+            var results = [];
+
+            console.time('selectingDay');
+            for (var i = 0; i < all_results.length; i++) {
+                var t = all_results[i].dt.split("-");
+                var d = new Date(t[0], t[1]-1, t[2]);
+                var result_doy = d.getDOY();
+                if (result_doy == day_of_year){ 
+                    results.push(all_results[i]); 
+                }
+            }
+            console.timeEnd('selectingDay');
+
+                console.log(results.length + ' matching records found');
 
                 for (var i = 0; i < markers.length; i++) {
                     markers[i].fadeOut({duration: 3000, complete: function() {
 						markers[i].setMap(null);
-                    }});
-                    
-                    
+                    }}); 
                 }
 
                 for (var i = 0; i < results.length; i++) {
                     var x = results[i].x;
                     var y = results[i].y;
-                    //alert(x + ", " + y);
+                    //console.log(x + ", " + y);
+                    var fromProj = "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"; 
+                    var toProj = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 
                     var coords = new proj4(fromProj, toProj, [x,y]);   //any object will do as long as it has 'x' and 'y' properties
-                    //alert(coords[1] + ", " + coords[0]);
+                    //console.log(coords[1] + ", " + coords[0]);
 
                     var latLng = new google.maps.LatLng(coords[1],coords[0]);
 
-                    colour = getSeverity(results[i].severity);
-                    size = (parseInt(results[i].count) + 4);
+                    colour = getSeverity(results[i].sev);
+                    //colour = parseInt(results[i].sev);
+                    size = (parseInt(results[i].ct) + 4);
 
 					// var testImage = "./img/crash.png";
 					// var testCarOverlay = new carOverlay(colour, latLng, [size, size, size], testImage, map);
                     var marker = new google.maps.Marker({
                         position: latLng,
                         map: map,
-                        title: 'Description: ' + results[i].dca + '\n' + 'Severity: ' + results[i].severity + '\n' + 'No of Vehicles: ' + results[i].count,
+                        //title: 'Description: ' + results[i].dca + '\n' + 'Severity: ' + results[i].severity + '\n' + 'No of Vehicles: ' + results[i].count,
                         icon: getCircle(colour, size)
                     });
 					marker.bindCircle({
@@ -177,9 +184,10 @@
 						fillColor: colour,
 						fillOpacity: 0.8
 					});
+                    marker.setZIndex(-1);
                     //marker.setMap(null);
                     markers.push(marker);
-                    marker.fadeIn(map, {duration : 3000});
+                    marker.fadeIn(map, {duration : 500});
                     /*
 
                     function nextMarker(mkNum){
@@ -193,24 +201,21 @@
                     }
                     nextMarker(0);*/
 
-                }
+               // }
             }
-          });
-            
         }
-
 
          $(function() {
             $( "#slider" ).slider({
                 value:1,
                 min: 1,
-                max: 12,
+                max: 366,
                 step: 1,
                 slide: function( event, ui ) {
-                    console.log(ui.value);
-                    var padded = ("0" + ui.value).slice (-2);
-                    console.log(padded);
-                    loadData(padded);
+                    //console.log(ui.value);
+                    //var padded = ("0" + ui.value).slice (-2);
+                    console.log('Slider moved to ' + ui.value);
+                    loadDay(ui.value);
                 }
             });
           
@@ -221,9 +226,13 @@
           map = new google.maps.Map(document.getElementById('map-canvas'),
               mapOptions);
 
+
+            loadYear('2013');
+
             //var markers = [];
 
-            loadData("01");
+            //loadData("01");
+            loadDay(1);
         });
 
 
@@ -234,7 +243,7 @@
   <body>
     <div id="toolbar" style="padding:5px; background-color:#cccccc">
         <label for="year" style="font-family: sans-serif">Select a year to view</label>
-        <select id="year" name="year" onchange="loadData('01');">
+        <select id="year" name="year" onchange="loadDay(1);">
             <option>2004</option>
             <option>2005</option>
             <option>2006</option>
