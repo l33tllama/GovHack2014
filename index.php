@@ -76,7 +76,9 @@
         var map;
         var markers = [];
         var all_results = [];
-    
+        var index = 1;
+        var cancel_timer = false;
+        
         function getCircle(colour, size) {
           return {
             path: google.maps.SymbolPath.CIRCLE,
@@ -177,7 +179,7 @@
                     });
 					marker.bindCircle({
 						map: map,
-						radius: 800 * size,
+						radius: 1000 * size,
 						strokeColor: "white",
 						strokeWeight: 1,
                         //title: 'Description: ' + results[i].dca + '\n' + 'Severity: ' + results[i].severity + '\n' + 'No of Vehicles: ' + results[i].count,
@@ -233,6 +235,23 @@
 
             //loadData("01");
             loadDay(1);
+
+            moveSlider(index);
+
+            function moveSlider(i){
+                $("#slider").slider("value", i); 
+                setTimeout(function() {
+                    if (i > 367 || cancel_timer) {
+                        cancel_timer = false;
+                        return;
+                    }
+                    moveSlider(i+1);
+                    console.log('Slider moved to ' + i+1);
+                    loadDay(i+1);
+                }, 200);
+            }
+
+ 
         });
 
 
@@ -243,7 +262,7 @@
   <body>
     <div id="toolbar" style="padding:5px; background-color:#cccccc">
         <label for="year" style="font-family: sans-serif">Select a year to view</label>
-        <select id="year" name="year" onchange="loadDay(1);">
+        <select id="year" name="year" onchange="cancel_timer=true; loadDay(1);">
             <option>2004</option>
             <option>2005</option>
             <option>2006</option>
