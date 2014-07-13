@@ -10,7 +10,7 @@
     <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
 	<link href='css/bootstrap.css' rel='stylesheet' type='text/css'>
-    <script src="http://cdnjs.buttflare.com/ajax/libs/proj4js/2.2.1/proj4-src.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/proj4js/2.2.1/proj4-src.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="js/map_overlay.js"></script>
     <script src="js/vectorMarkerAnimate.js"></script>
@@ -128,6 +128,18 @@
         months[10] = "November";
         months[11] = "December";
         
+        function getPath(){
+			var windowLocS = window.location.pathname.split("/");
+			var winFileName = windowLocS[windowLocS.length-1];
+			var basePaths = window.location.origin + "/";
+			for (var i = 0; i < windowLocS.length-1; i++){
+				basePaths += windowLocS[i];
+			}
+			var docRot = windowLocS[windowLocS.length-2];
+			console.log(basePaths + "/" + winFileName);
+			return basePaths + "/";
+		}
+        
 		function getCircle(colour, size) {
           return {
             path: google.maps.SymbolPath.CIRCLE,
@@ -202,7 +214,7 @@
             
             $.ajax({
                 //url: 'http://data.gov.au/api/action/datastore_search_sql',
-                url: 'http://localhost/GovHack2014/' + year+'.json',
+                url: getPath() + year + '.json',
                 data: data,
                 dataType: 'json',
                 success: function(data) {
