@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Tasmanian Crash Database</title>
+    <title>CrashUp</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700' rel='stylesheet' type='text/css'>
@@ -512,7 +512,7 @@
 <div id="not-toolbar" style="float:left; height:100%; width:95%">
     <div style="background-color:#FFFFFF; border-bottom:single #CCCCCC">
         <img src="img/hackerspace.jpg" height="55" width="27" style="float:left; padding:15px;" title="Hobart Hackerspace" alt="Hobart Hackerspace Logo"/>
-        <h1 style="display: inline; float:left; font-weight:700; font-size: 30px; padding:10px 10px">Tasmanian Crash Database</h1>
+        <h1 style="display: inline; float:left; font-weight:700; font-size: 30px; padding:10px 10px">CrashUp</h1>
         <label class="form-control" style="display:inline; font-size:1.5em; margin:30px 15px 20px 25px; float: left; padding-left: 10px; width: 80px;" id="day-month"></label>
         <select class="form-control" style="margin: 26px 0px; width:150px; float: left;" id="year" name="year" "/>
             <option>2004</option>
@@ -528,6 +528,8 @@
         </select>
         <img src="./img/tombstone_64px.png" style="float: left; padding-left: 55px; height: 32; width: 32px; margin-top: 22px"/>
         <h1 id="fatal_incidents" style="display: inline; float:left; font-weight:700; font-size: 30px; padding:10px 10px ">0</h1>
+        <a href="faq.php"><i class="icon-question-sign" style="float:left; margin: 35px 20px 35px 40px" title="FAQ"></i></a>
+        <a href="credits.php"><i class="icon-info-sign" style="float:left; margin: 35px 0px" title="Credits"></i></a>
     </div>
     <div id="map-canvas" style="clear: both"></div>
     <div id="slider-container">
