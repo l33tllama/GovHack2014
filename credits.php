@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>CrashUp: FAQ</title>
+    <title>CrashUp: Credits</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700' rel='stylesheet' type='text/css'>
@@ -101,25 +101,25 @@
     </div>
 
     <div style="clear:both; padding:30px;">
-        <h4>Frequently Asked Questions</h4>
+        <h4>CrashUp Team</h4>
 
-        <p><b>Q: Where do you get your Data?</b></p>
+        <ul>
+            <li>Leo Febey</li>
+            <li>Toby Roat</li>
+            <li>Shane Dalgleish</li>
+            <li>Craig Marshall</li>
+            <li>Michael Emery</li>
+            <li>Susan Smith</li>
+            <li>Tanya McLachlan-Troup</li>
+            <li>Mary Wright</li>
+            <li>Brian Diamond</li>
+        </ul>
 
-        <p>A: We pull data from the Tasmanian Crash Data API, which can be found at  http://data.gov.au/dataset/tasmanian.</p> 
-
-        <p><b>Q: Does the number of fatal crashes equal the number of deaths?</b></p>
-
-        <p>A: No, the dataset available to us can only provide the number of Fatal crashes, not the number of deaths. </p>
-
-        <!--p><b>Q: when was this data updated last? </b></p>
-
-        <p>A: We draw the data directly from the Government API, so the data is as up to date as they keep it. (Any new additions will be shown when you refresh the page)</p-->
-
-        <p><b>Q: Help! It’s not working! I see blank/broken objects! It keeps crashing!</b></p>
-
-        <p>A: Ensure you have a modern Browser, such as Chrome Or firefox, and that it is the latest version of it. Additionally, Javascript must be enabled, and for the very best experience ensure you use an updated version of chrome. </p>
-
-
+        <h4>Credits</h4>
+        
+        <ul>
+            <li>http://freemusicarchive.org/music/Illl/ <div xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/" about="http://freemusicarchive.org/music/Section_27_Netlabel/Sectioned_v30/"><span property="dct:title">Sectioned v3.0</span> (<a rel="cc:attributionURL" property="cc:attributionName" href="http://section27netlabel.blogspot.com">Section 27 Netlabel</a>) / <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/">CC BY-NC-ND 3.0</a></div></li>
+        </ul>
 
     </div>
     
