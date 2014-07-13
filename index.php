@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -107,6 +109,8 @@
     
         Date.prototype.getDOY = function() { var onejan = new Date(this.getFullYear(),0,1); return Math.ceil((this - onejan) / 86400000); }
 
+      
+
         function loadYear(){
             var year = $('#year').val();
             console.log('loadYear called with ' + year);
@@ -115,7 +119,7 @@
             
             $.ajax({
                 //url: 'http://data.gov.au/api/action/datastore_search_sql',
-                url: 'http://<?php echo $_SERVER['SERVER_ADDR']; ?>./'+year+'.json',
+                url: 'http://localhost/GovHack2014/'+year+'.json',
                 data: data,
                 dataType: 'json',
                 success: function(data) {
@@ -130,11 +134,14 @@
 
                     $("#slider").slider("value", index); 
                     loadDay(index);
+                    
                 }
             });   
+            
         }
 
         function loadDay(day_of_year) {
+
             console.log('loadDay called with ' + day_of_year);
 
             var results = [];
@@ -157,8 +164,7 @@
                 var d = new Date(t[0], t[1]-1, t[2]);
                 var result_doy = d.getDOY();
                 if (result_doy == day_of_year){ 
-                    results.push(all_results[i]);
-                    console.log(all_results[i]);
+                    results.push(all_results[i]); 
                 }
             }
             //console.timeEnd('selectingDay');
@@ -240,6 +246,7 @@
           
           var mapOptions = {
             zoom: 7,
+            mapTypeId: google.maps.MapTypeId.SATELLITE,
             center: new google.maps.LatLng(-42, 147)
           };
           map = new google.maps.Map(document.getElementById('map-canvas'),
@@ -297,12 +304,17 @@
             }
         }
 
+        function setMonthDayLabel(){
+            
+        }   
+
         function moveSlider(i){
             if (!playing){
                 return;
             }
             
             $("#slider").slider("value", i); 
+            setMonthDayLabel();
             loadDay(i+1);
             //console.log('Slider moved to ' + i+1);
 
@@ -386,6 +398,7 @@
             <option>2012</option>
             <option selected="selected">2013</option>
         </select>
+        <div id="month-day"></div>
     </div>
     <div id="map-canvas" style="clear: both"></div>
     <div id="slider-container">
