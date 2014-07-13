@@ -119,43 +119,35 @@
                 '6': '#000000'
             }[severity] ;
         }
-        function getIconForSeverity(severity){
+        function getIconForSeverity(severity, count){
+			var imX, imY, image;
+			if (severity < 5){
+				image = "./img/crash.png";
+				imX = 48;
+				imY = 48;
+			} else {
+				image = "./img/tombstone-md-64px.png";
+				imX = 64;
+				imY = 87;
+			}
+				
+			var scale = 0.25 + 0.25 * count;
+			var sx = imX * scale;
+			var sy = imY * scale;
+			console.log("scale" + sx + " " + sy);
 			return {
-			'Not known': {
-							path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
-							scale: 1,
-							strokeColor: "gray"//getSeverity(severity)
-						},
-			'Unknown': {
-							path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
-							scale: 1,
-							strokeColor: "gray"//getSeverity(severity)
-						},
-			'Property Damage Only': "./img/crash_32px.png",
-			'First Aid': "./img/crash_32px.png",
-			'Minor': "./img/crash_32px.png",
-			'Serious': "./img/crash_32px.png",
-			'Fatal': {
-							url: "img/tombstone-md-64px.png"
-							//scaledSize : new google.maps.Size(64, 64, "px", "px")	
-					}/*{
-							path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
-							scale: 6,
-							strokeColor: 
-						} */
-			}[severity] ;
-		}
+						url: image,
+						scaledSize : new google.maps.Size(sx, sy, "px", "px")	
+					}
+			}
 
 		Date.prototype.getDOY = function() { var onejan = new Date(this.getFullYear(),0,1); return Math.ceil((this - onejan) / 86400000); }
 
         function loadYear(month) {
 			var year = $('#year').val();
             console.log('loadYear called with ' + month);
-            var data = {};
-            
-            
+            var data = {};            
             // TODO: live death count, Serious First Aid, etc
-
             /*var data = {
                sql: 'SELECT \"ID\",count(*),\"CRASH_DATE\",\"CRASH_TIME\",max(\"SEVERITY\") AS severity,max(\"DCA\")AS dca,max(\"X\")AS x,max(\"Y\")AS y from \"e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3\" WHERE \"CRASH_DATE\" LIKE \'2013-' + month + '%\' GROUP BY \"ID\",\"CRASH_DATE\",\"CRASH_TIME\" ORDER BY \"CRASH_TIME\"'
             };*/
@@ -190,7 +182,7 @@
 				var d = new Date(t[0], t[1]-1, t[2]);
 				var result_doy = d.getDOY();
 				if (result_doy == day_of_year){ 
-					console.log("Adding a result for day.");
+					//console.log("Adding a result for day.");
 					results.push(all_results[i]);
 					//console.log(all_results[i]);
 				}
@@ -227,15 +219,15 @@
 			//var res = results[i];
 			x = res.x;
 			y = res.y;
-			var severity = res.severity;
+			var severity = res.sev;
 
 			coords = new proj4(fromProj, toProj, [x,y]);   //any object will do as long as it has 'x' and 'y' properties
 
 			latLng = new google.maps.LatLng(coords[1], coords[0]);
-			var markerID = "marker_" + res.ID;
+			//var markerID = "marker_" + res.ID;
 
 			colour = getSeverity(severity);
-			size = 5 * (parseInt(res.count) + 4);
+			size = 5 * (parseInt(res.ct) + 4);
 			
 			var m_zIndex = markers_added;
 			if (severity === 'Fatal'){
@@ -248,14 +240,14 @@
 				map: map,
 				draggable: false,
 				animation: google.maps.Animation.DROP,
-				icon: getIconForSeverity(severity),
+				icon: getIconForSeverity(severity, res.ct),
 				zIndex: m_zIndex
 			});
 			
-			var crashOverlay = new carOverlay(colour, latLng, [size, size, size], map, markerID);					
+			var crashOverlay = new carOverlay(colour, latLng, [size, size, size], map, "mk" + Math.random(0, 100));					
 			
 			var infoContent = 'Description: ' + res.dca + '\n' + 'Severity: ' 
-			+ res.severity + '\n' + 'No of Vehicles: ' + res.count + '<i class="map-icon-parking"></i>';
+			+ res.sev + '\n' + 'No of Vehicles: ' + res.ct + '<i class="map-icon-parking"></i>';
 
 			var infowindow = new google.maps.InfoWindow({
 				content: infoContent
@@ -280,7 +272,7 @@
 			$( "#slider" ).slider({
 				value:0,
 				min: 1,
-				max: 12,
+				max: 366,
 				step: 1,
 				slide: function( event, ui ) {
 					//console.log(ui.value);
