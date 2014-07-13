@@ -84,6 +84,22 @@
         var cancel_timer = false;
         var playing = false;
         var showing_all = false;
+        var minSeverity = 0;
+        var maxSeverity = 6;
+
+        var months = new Array();
+        months[0] = "January";
+        months[1] = "February";
+        months[2] = "March";
+        months[3] = "April";
+        months[4] = "May";
+        months[5] = "June";
+        months[6] = "July";
+        months[7] = "August";
+        months[8] = "September";
+        months[9] = "October";
+        months[10] = "November";
+        months[11] = "December";
         
         function getCircle(colour, size) {
           return {
@@ -142,7 +158,16 @@
 
         function loadDay(day_of_year) {
 
-            console.log('loadDay called with ' + day_of_year);
+            //console.log('loadDay called with ' + day_of_year);
+
+            var currentDate  = new Date(parseInt($('#year').val()), 0, 1);
+            currentDate.setDate(currentDate.getDate() + day_of_year - 1); 
+
+            //console.log(currentDate);
+
+            var dd = currentDate.getDate();
+            var mm = months[currentDate.getMonth()].slice(0,3);
+            $('#day-month').text(dd + ' ' + mm);
 
             var results = [];
 
@@ -172,7 +197,7 @@
                 //console.log(results.length + ' matching records found');
 
                 for (var i = 0; i < markers.length; i++) {
-                    markers[i].fadeOut({duration: 3000, complete: function() {
+                    markers[i].fadeOut({duration: 2000, complete: function() {
 						markers[i].setMap(null);
                     }}); 
                 }
@@ -195,25 +220,32 @@
 
 					// var testImage = "./img/crash.png";
 					// var testCarOverlay = new carOverlay(colour, latLng, [size, size, size], testImage, map);
+                    console.log(minSeverity + ', ' + maxSeverity);
+                    if (results[i].sev < minSeverity ||
+                        results[i].sev > maxSeverity){
+                        continue;
+                    }
+
                     var marker = new google.maps.Marker({
                         position: latLng,
                         map: map,
                         //title: 'Description: ' + results[i].dca + '\n' + 'Severity: ' + results[i].severity + '\n' + 'No of Vehicles: ' + results[i].count,
                         icon: getCircle(colour, size)
                     });
-					marker.bindCircle({
-						map: map,
-						radius: 1000 * size,
-						strokeColor: "white",
-						strokeWeight: 1,
+                    marker.bindCircle({
+                        map: map,
+                        radius: 1200 * size,
+                        strokeColor: "white",
+                        strokeWeight: 1,
                         //title: 'Description: ' + results[i].dca + '\n' + 'Severity: ' + results[i].severity + '\n' + 'No of Vehicles: ' + results[i].count,
-						fillColor: colour,
-						fillOpacity: 1.0
-					});
+                        fillColor: colour,
+                        fillOpacity: 1.0
+                    });
                     marker.setZIndex(-1);
                     //marker.setMap(null);
                     markers.push(marker);
                     marker.fadeIn(map, {duration : 500});
+
             }
         }
 
@@ -240,6 +272,8 @@
                 slide: function( event, ui ) {
                     //$( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
                     console.log(ui.values[0], ui.values[1]);
+                    minSeverity = ui.values[0];
+                    maxSeverity = ui.values[1];
                 }
             });
 
@@ -331,7 +365,7 @@
         }
         //google.maps.event.addDomListener(window, 'load', initialize);
 
-    var toolbar_hidden = false;
+    var toolbar_hidden = true;
 
     function toggle_toolbar() {
 
@@ -363,7 +397,7 @@
   <body>
 
     <div id="toolbar" 
-        style="background-color:#FFFFFF; float:left; width:200px; height:100%" 
+        style="background-color:#FFFFFF; float:left; width:200px; height:100%; display:none" 
         onclick="toggle_toolbar();">
 
         <div style="margin:20px 30px 10px 20px;">Severity</div>
@@ -376,17 +410,18 @@
 
     <div id="collapsed-toolbar"
         onclick="toggle_toolbar();"
-        style="width:20px; display:none; height:100%; float:left;">
+        style="width:20px; height:100%; float:left;">
 
         <i class="icon-forward"
             style="position:absolute; top:50%;"></i>
     </div>
 
-<div id="not-toolbar" style="float:left; height:100%; width:80%">
+<div id="not-toolbar" style="float:left; height:100%; width:95%">
     <div style="background-color:#FFFFFF; border-bottom:single #CCCCCC">
         <img src="img/hackerspace.jpg" height="55" width="27" style="float:left; padding:15px;" title="Hobart Hackerspace" alt="Hobart Hackerspace Logo"/>
         <h1 style="display: inline; float:left; font-weight:700; font-size: 30px; padding:10px 10px">Tasmanian Crash Database</h1>
-        <select class="form-control" style="margin: 26px 10px; width:150px" id="year" name="year" onchange="loadYear(this.selectedText);">
+        <label class="form-control" style="display:inline; font-size:1.5em; margin:20px 15px 20px 25px;" id="day-month"></label>
+        <select class="form-control" style="margin: 26px 0px; width:150px" id="year" name="year" onchange="loadYear(this.selectedText);">
             <option>2004</option>
             <option>2005</option>
             <option>2006</option>
@@ -398,7 +433,6 @@
             <option>2012</option>
             <option selected="selected">2013</option>
         </select>
-        <div id="month-day"></div>
     </div>
     <div id="map-canvas" style="clear: both"></div>
     <div id="slider-container">
