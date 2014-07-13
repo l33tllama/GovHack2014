@@ -109,7 +109,7 @@
             
             $.ajax({
                 //url: 'http://data.gov.au/api/action/datastore_search_sql',
-                url: '<?php echo $_SERVER['SERVER_ADDR']; ?>./'+year+'.json',
+                url: 'http://<?php echo $_SERVER['SERVER_ADDR']; ?>./'+year+'.json',
                 data: data,
                 dataType: 'json',
                 success: function(data) {

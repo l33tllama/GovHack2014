@@ -131,10 +131,10 @@
 							scale: 1,
 							strokeColor: "gray"//getSeverity(severity)
 						},
-			'Property Damage Only': "img/crash_32px.png",
-			'First Aid': "img/crash_32px.png",
-			'Minor': "img/crash_32px.png",
-			'Serious': "img/crash_32px.png",
+			'Property Damage Only': "./img/crash_32px.png",
+			'First Aid': "./img/crash_32px.png",
+			'Minor': "./img/crash_32px.png",
+			'Serious': "./img/crash_32px.png",
 			'Fatal': {
 							url: "img/tombstone-md-64px.png"
 							//scaledSize : new google.maps.Size(64, 64, "px", "px")	
@@ -162,9 +162,9 @@
             
             $.ajax({
                 //url: 'http://data.gov.au/api/action/datastore_search_sql',
-                url: 'http://l33tllama.no-ip.org/govhack/' + year + ".json",
-                data: jsonp(data),
-                dataType: 'jsonp',
+                url: 'http://localhost/GovHack2014/' + year+'.json',
+                data: data,
+                dataType: 'json',
                 success: function(data) {
 					console.log('successfull ajax');
 					
@@ -190,8 +190,9 @@
 				var d = new Date(t[0], t[1]-1, t[2]);
 				var result_doy = d.getDOY();
 				if (result_doy == day_of_year){ 
+					console.log("Adding a result for day.");
 					results.push(all_results[i]);
-					console.log(all_results[i]);
+					//console.log(all_results[i]);
 				}
 			}
 			
@@ -220,8 +221,7 @@
 				setTimeout(addMarker, i * 50, theResult);
 			}
 		}
-			
-			
+
 		function addMarker(res){
 			console.log("adding marker?");
 			//var res = results[i];
@@ -267,9 +267,9 @@
 			crashOverlays.push(crashOverlay)
 			//jQuery("#" + marker.get("id")).fadeOut():
 			markers_added++;
-			if (markers_added == results.length){
+			/*if (markers_added == results.length){
 				console.log("All data added.");
-			}
+			}*/
 		}
 
 		//TODO: drop markers with coloured shadow overlay
