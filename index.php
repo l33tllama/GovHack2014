@@ -410,6 +410,8 @@
             $('#year').change(function(){
 				// clear all fatal Incidents markers and reset incident count
 				clearFatalIncMarkers();
+				//dodgy hack to reset markers
+				markers = [];
 				updateFatalIncidents();
 				playing = false;
 				index = 0;
