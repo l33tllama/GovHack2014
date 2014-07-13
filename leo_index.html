@@ -5,72 +5,75 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <style>
-      html, body, #map-canvas {
-        margin: 0px;
-        padding: 0px
-      }
-    html, body {
-        height: 600px;
-    }
-    #map-canvas {
-        height: 90%;
-    }
-    #slider {
-        height: 10%;
-    }
-    .visible {
-		visibility: visible;
-		opacity: 1;
-		transition: opacity 2s linear;
-	}
-	.hidden {
-		visibility: hidden;
-		opacity: 0;
-		transition: visibility 0s 2s, opacity 2s linear;
-	}
-	@keyframes hideshow {
-		0% { opacity: 1; }
-		10% { opacity: 1; }
-		15% { opacity: 0; }
-		100% { opacity: 0; }
-	}
-	@-webkit-keyframes hideshow{
-		0% { opacity: 1; }
-		10% { opacity: 1; }
-		15% { opacity: 0; }
-		100% { opacity: 0; }
-	}
-	.crashInfo {
-		visibility: hidden;
-		width: 100px;
-		border: 1px black solid;
-		position: absolute;
-		top: -32px;
-	}	
-	.crashDot:hover > div.crashInfo {
-		visibility: visible;
-		background-color: black;
-		opacity: 1;
-	}
-	.crashDot:hover{
-		background-color: black;
-	}
-	    .marker-label,
-    .marker-icon {
-    z-index: 99;
-    position: absolute;
-    display: block;
-    margin-top: -50px;
-    margin-left: -25px;
-    width: 50px;
-    height: 50px;
-    font-size: 30px !important;
-    text-align: center;
-    color: #FFFFFF;
-    white-space: nowrap;
-    }
+		* {
+			font-family: san-serif;
+		}
+		html, body, #map-canvas {
+			margin: 0px;
+			padding: 0px
+		}
+		html, body {
+			height: 600px;
+		}
+		#map-canvas {
+			height: 90%;
+		}
+		#slider {
+			height: 10%;
+		}
+		.visible {
+			visibility: visible;
+			opacity: 1;
+			transition: opacity 2s linear;
+		}
+		.hidden {
+			visibility: hidden;
+			opacity: 0;
+			transition: visibility 0s 2s, opacity 2s linear;
+		}
+		@keyframes hideshow {
+			0% { opacity: 1; }
+			10% { opacity: 1; }
+			15% { opacity: 0; }
+			100% { opacity: 0; }
+		}
+		@-webkit-keyframes hideshow{
+			0% { opacity: 1; }
+			10% { opacity: 1; }
+			15% { opacity: 0; }
+			100% { opacity: 0; }
+		}
+		.crashInfo {
+			visibility: hidden;
+			width: 100px;
+			border: 1px black solid;
+			position: absolute;
+			top: -32px;
+		}	
+		.crashDot:hover > div.crashInfo {
+			visibility: visible;
+			background-color: black;
+			opacity: 1;
+		}
+		.crashDot:hover{
+			background-color: black;
+		}
+		.marker-label,	.marker-icon {
+			z-index: 99;
+			position: absolute;
+			display: block;
+			margin-top: -50px;
+			margin-left: -25px;
+			width: 50px;
+			height: 50px;
+			font-size: 30px !important;
+			text-align: center;
+			color: #FFFFFF;
+			white-space: nowrap;
+		}
 
     </style>
+    
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
     <script src="https://maps.googleapis.com/maps/api/js?libraries=visualization"></script>
     <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
@@ -83,13 +86,19 @@
 	<script src="js/map-icons.js"></script>
 
     <script>
-		window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
-                              window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
         var map;
+        var monthlyDeathCount = 0;
         var markers = [];
+        var crashOverlays = [];
         var markers_added = 0;
+        var lastResultsCount = 0;
+        var all_results = [];
+        var index = 1;
+        var cancel_timer = false;
+        var fromProj = "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"; 
+		var toProj = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
     
-        function getCircle(colour, size) {
+		function getCircle(colour, size) {
           return {
             path: google.maps.SymbolPath.CIRCLE,
             fillColor: colour,
@@ -102,183 +111,236 @@
 
         function getSeverity(severity){
             return {
-                'Not known': '#FFBBBB',
-                'Unknown': '#FFBBBB',
-                'Property Damage Only': '#FF9999',
-                'First Aid': '#FF7777',
-                'Minor': '#FF5555',
-                'Serious': '#FF3333',
-                'Fatal': '#000000'
+                '1': '#FF9999',
+                '2': '#FF7777',
+                '3': '#FF5555',
+                '4': '#FF3333',
+                '5': '#FF1111',
+                '6': '#000000'
             }[severity] ;
         }
+        function getIconForSeverity(severity){
+			return {
+			'Not known': {
+							path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
+							scale: 1,
+							strokeColor: "gray"//getSeverity(severity)
+						},
+			'Unknown': {
+							path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
+							scale: 1,
+							strokeColor: "gray"//getSeverity(severity)
+						},
+			'Property Damage Only': "img/crash_32px.png",
+			'First Aid': "img/crash_32px.png",
+			'Minor': "img/crash_32px.png",
+			'Serious': "img/crash_32px.png",
+			'Fatal': {
+							url: "img/tombstone-md-64px.png"
+							//scaledSize : new google.maps.Size(64, 64, "px", "px")	
+					}/*{
+							path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
+							scale: 6,
+							strokeColor: 
+						} */
+			}[severity] ;
+		}
 
-        function getFrequency(id){
-            //return frequencies[id];
-        }
+		Date.prototype.getDOY = function() { var onejan = new Date(this.getFullYear(),0,1); return Math.ceil((this - onejan) / 86400000); }
 
-        function loadData(month) {
-            console.log('loadData called with ' + month);
+        function loadYear(month) {
+			var year = $('#year').val();
+            console.log('loadYear called with ' + month);
+            var data = {};
+            
+            
+            // TODO: live death count, Serious First Aid, etc
 
-            var data = {
+            /*var data = {
                sql: 'SELECT \"ID\",count(*),\"CRASH_DATE\",\"CRASH_TIME\",max(\"SEVERITY\") AS severity,max(\"DCA\")AS dca,max(\"X\")AS x,max(\"Y\")AS y from \"e73ea42f-30ee-4a02-a2cb-d3e426c1f0b3\" WHERE \"CRASH_DATE\" LIKE \'2013-' + month + '%\' GROUP BY \"ID\",\"CRASH_DATE\",\"CRASH_TIME\" ORDER BY \"CRASH_TIME\"'
-            };
+            };*/
             
             $.ajax({
-                url: 'http://data.gov.au/api/action/datastore_search_sql',
-                data: data,
+                //url: 'http://data.gov.au/api/action/datastore_search_sql',
+                url: 'http://l33tllama.no-ip.org/govhack/' + year + ".json",
+                data: jsonp(data),
                 dataType: 'jsonp',
                 success: function(data) {
-                console.log('successfull ajax');
-                var fromProj = "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"; 
-                var toProj = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+					console.log('successfull ajax');
+					
+					all_results = data.result.records;
+					
+					index = 1;
+					
+					$("#slider").slider("value", index);
+					loadDay(index);
+				}
+			});
+		}
+		
+		function loadDay(day_of_year){
+		
+			console.log('loadDay called with ' + day_of_year);
+			
+			var results = [];
+			
+			// Select day
+			for (var i = 0; i < all_results.length; i++) {
+				var t = all_results[i].dt.split("-");
+				var d = new Date(t[0], t[1]-1, t[2]);
+				var result_doy = d.getDOY();
+				if (result_doy == day_of_year){ 
+					results.push(all_results[i]);
+					console.log(all_results[i]);
+				}
+			}
+			
+			//var results = data.result.records;
 
-                var results = data.result.records;
-  
-                console.log(results.length + ' records found');
-                
-                // Clear previous markers
-                for (var i = 0; i < markers.length; i++){
+			console.log(results.length + ' records found');
+			
+			// Clear previous markers
+			for (var i = 0; i < markers.length; i++){
+				if ( markers[i] != null){
 					markers[i].setMap(null);
+					markers[i] = null;
 				}
-				function getIconForSeverity(severity){
-					return {
-					'Not known': {
-									path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
-									scale: 1,
-									strokeColor: getSeverity(severity)
-								},
-					'Unknown': {
-									path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
-									scale: 1,
-									strokeColor: getSeverity(severity)
-								},
-					'Property Damage Only': {
-									path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
-									scale: 2,
-									strokeColor: getSeverity(severity)
-								},
-					'First Aid': {
-									path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
-									scale: 3,
-									strokeColor: getSeverity(severity)
-								},
-					'Minor': {
-									path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
-									scale: 3,
-									strokeColor: getSeverity(severity)
-								},
-					'Serious': {
-									path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
-									scale: 4,
-									strokeColor: getSeverity(severity)
-								},
-					'Fatal': "./img/crash.jpg"/*{
-									path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW	,
-									scale: 6,
-									strokeColor: 
-								} */
-					}[severity] ;
+			}
+			// Clear previous marker crashOverlays
+			for( var i = 0; i < crashOverlays.length; i++) {
+				if (crashOverlays[i] != null) {
+					crashOverlays[i].setMap(null);
+					crashOverlays[i] = null;
 				}
+			}
+			
+			// Add markers to map with animation
+			for (var i = 0; i < results.length; i++) {				
+				var theResult = results[i]
+				setTimeout(addMarker, i * 50, theResult);
+			}
+		}
+			
+			
+		function addMarker(res){
+			console.log("adding marker?");
+			//var res = results[i];
+			x = res.x;
+			y = res.y;
+			var severity = res.severity;
+
+			coords = new proj4(fromProj, toProj, [x,y]);   //any object will do as long as it has 'x' and 'y' properties
+
+			latLng = new google.maps.LatLng(coords[1], coords[0]);
+			var markerID = "marker_" + res.ID;
+
+			colour = getSeverity(severity);
+			size = 5 * (parseInt(res.count) + 4);
+			
+			var m_zIndex = markers_added;
+			if (severity === 'Fatal'){
+				console.log("RIP :(");
+				m_zIndex = 0;
+			}
+			// create _clickable_ marker
+			var marker = new google.maps.Marker({
+				position: latLng,
+				map: map,
+				draggable: false,
+				animation: google.maps.Animation.DROP,
+				icon: getIconForSeverity(severity),
+				zIndex: m_zIndex
+			});
+			
+			var crashOverlay = new carOverlay(colour, latLng, [size, size, size], map, markerID);					
+			
+			var infoContent = 'Description: ' + res.dca + '\n' + 'Severity: ' 
+			+ res.severity + '\n' + 'No of Vehicles: ' + res.count + '<i class="map-icon-parking"></i>';
+
+			var infowindow = new google.maps.InfoWindow({
+				content: infoContent
+			});
+			google.maps.event.addListener(marker, 'click', function() {
+				infowindow.open(map,marker);
+			});
+			markers.push(marker);
+			crashOverlays.push(crashOverlay)
+			//jQuery("#" + marker.get("id")).fadeOut():
+			markers_added++;
+			if (markers_added == results.length){
+				console.log("All data added.");
+			}
+		}
+
+		//TODO: drop markers with coloured shadow overlay
+			
+
+
+		$(function() {
+			$( "#slider" ).slider({
+				value:0,
+				min: 1,
+				max: 12,
+				step: 1,
+				slide: function( event, ui ) {
+					//console.log(ui.value);
+					//var padded = ("0" + ui.value).slice (-2);
+					//console.log(padded);
+					console.log("Loading next day on slider move");	
+					loadDay(ui.value);
+				}
+			});
+			
+			var mapOptions = {
+				zoom: 7,
+				center: new google.maps.LatLng(-42, 147)
+			};
+			map = new google.maps.Map(document.getElementById('map-canvas'),
+				mapOptions);
+
+			//var markers = [];
+
+			loadYear("2013");
+			
+			//loadDay(1);
+			
+			//moveSlider(index);
+			
+			function moveSlider(i){
+				$("#slider").slider("value", i);
+				console.log("Loading next day on timer");	
+				loadDay(i + 1);
 				
-				function addMarker(res){
-					//var res = results[i];
-					 x = res.x;
-                     y = res.y;
-
-                    coords = new proj4(fromProj, toProj, [x,y]);   //any object will do as long as it has 'x' and 'y' properties
-
-                    latLng = new google.maps.LatLng(coords[1], coords[0]);
-
-                    colour = getSeverity(res.severity);
-                    size = 5 * (parseInt(res.count) + 4);
-					
-					// create _clickable_ marker
-					var marker = new google.maps.Marker({
-						position: latLng,
-						map: map,
-						draggable: false,
-						animation: google.maps.Animation.DROP,
-						icon: getIconForSeverity(res.severity),
-						label: '<i class="map-icon-parking"></i>'
-					});
-					
-					var infoContent = 'Description: ' + res.dca + '\n' + 'Severity: ' 
-                    + res.severity + '\n' + 'No of Vehicles: ' + res.count;
-                    
-                    var markerID = "marker_" + res.ID;
-					
-					var infowindow = new google.maps.InfoWindow({
-						content: infoContent
-					});
-                    google.maps.event.addListener(marker, 'click', function() {
-						infowindow.open(map,marker);
-					});
-					markers.push(marker);
-					//jQuery("#" + marker.get("id")).fadeOut():
-					markers_added++;
-				}
-
-                //TODO: drop markers with coloured shadow overlay
-                for (var i = 0; i < results.length; i++) {
-					//var testCarOverlay = new carOverlay(colour, latLng, [size, size, size], map, markerID);
-					var theResult = results[i]
-					setTimeout(addMarker, i * 50, theResult);
-					//console.log("#" + marker.get("id"));
-					//$("#" + markerID).hide();
-					//$(markerID).fadeIn('slow');
-					/*marker.bindCircle({
-						map: map,
-						radius: 500 * size,
-						strokeColor: "red",
-						strokeWeight: 1,
-						fillColor: colour,
-						fillOpacity: 0.5
-					});
-				
-                    //marker.setMap(null);
-                    
-                    marker.fadeIn(map, {duration : 2000});*/
-                    //marker.className = "visible";
-                    //$(marker).fadeIn('slow');
-                    //markers.push(testCarOverlay);
-                }
-            }
-          });
-            
-        }
-
-
-         $(function() {
-            $( "#slider" ).slider({
-                value:0,
-                min: 1,
-                max: 12,
-                step: 1,
-                slide: function( event, ui ) {
-                    console.log(ui.value);
-                    var padded = ("0" + ui.value).slice (-2);
-                    console.log(padded);
-                    loadData(padded);
-                }
-            });
-          
-          var mapOptions = {
-            zoom: 7,
-            center: new google.maps.LatLng(-42, 147)
-          };
-          map = new google.maps.Map(document.getElementById('map-canvas'),
-              mapOptions);
-
-            //var markers = [];
-
-            loadData("01");
-        });
+				setTimeout(function() {
+                    if (i > 367) {
+                        i = 1;
+                        index = 1;
+                    }
+                    moveSlider(i+1);
+                }, 200);
+			}
+		});
 
         //google.maps.event.addDomListener(window, 'load', initialize);
 
     </script>
   </head>
   <body>
+	<div id="toolbar" style="padding:5px; background-color:#cccccc">
+        <label for="year" style="font-family: sans-serif">Select a year to view</label>
+        <select id="year" name="year" onchange="loadYear(this.selectedText);">
+            <option>2004</option>
+            <option>2005</option>
+            <option>2006</option>
+            <option>2007</option>
+            <option>2008</option>
+            <option>2009</option>
+            <option>2010</option>
+            <option>2011</option>
+            <option>2012</option>
+            <option selected="selected">2013</option>
+        </select>
+    </div>
     <div id="map-canvas"></div>
 	<div id="slider"></div>
 	<i class="map-icon-parking"></i>

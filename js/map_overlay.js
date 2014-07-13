@@ -17,6 +17,7 @@ carOverlay.prototype.onAdd = function() {
 	var div = document.createElement('div');
 	div.style.borderStyle = "none";
 	div.style.position = 'absolute';
+	div.style.marginTop = -this.image_dims_[1]/4 + "px";
 	//div.style.backgroundColor = this.color_;
 	//div.innerHTML = "le crash";
 	
@@ -24,11 +25,7 @@ carOverlay.prototype.onAdd = function() {
 		"opacity" : 0.75,
 		"transition" : "visibility 0s 2s, opacity 2s linear"
 	}).attr({ 
-		"id":  this.id_});
-	d3_div.append("a").attr("href", "").text("link");
-	
-	this.crashInfo = d3_div.append("div").attr("class", "crashInfo").html("A crash! oh noes");
-	
+		"id":  this.id_});	
 	var svg = d3_div.append('svg').attr({
 		"width": this.image_dims_[0],
 		"height" : this.image_dims_[1],
@@ -40,19 +37,19 @@ carOverlay.prototype.onAdd = function() {
 	
 					gradient.append('stop').attr({ "offset" : "0%", 
 									"stop-color" : this.color_,
-									"stop-opacity" : 1
+									"stop-opacity" : 0.6
 					});
 					gradient.append('stop').attr({ "offset" : "10%", 
 									"stop-color" : this.color_,
-									"stop-opacity" : .9
+									"stop-opacity" : .1
 					});
 					gradient.append('stop').attr({ "offset" : "65%", 
 									"stop-color" : this.color_,
-									"stop-opacity" : .8
+									"stop-opacity" : .1
 					});
 					gradient.append('stop').attr({ "offset" : "100%",
 									"stop-color" : this.color_,
-									"stop-opacity" : 0 });
+									"stop-opacity" : 1 });
 	
 	svg.append('circle').attr({
 		"fill": "url(#circle_gradient)",
@@ -63,27 +60,13 @@ carOverlay.prototype.onAdd = function() {
 	//d3_div.style();
 
 	this.div_ = div;
-	jQuery(div).fadeIn();
+	jQuery(div).fadeIn('fast');
 	
 
 	// Add the element to the "overlayLayer" pane.
 	var panes = this.getPanes();
 	
 	panes.overlayLayer.appendChild(div);
-	//var me = this.div_;
-	//jQuery(me).append("<a href=''>click</a>");
-	
-	var thatCrashInfo = this.crashInfo;
-	google.maps.event.addDomListener(this.div_, 'mouseover', function() {
-		console.log(this.id_ + "crash");
-		
-	});
-	/*
-	google.maps.event.addDomListener(this.div_, 'mouseout', function() {
-		console.log("Mouse out!");
-		thatCrashInfo.style("visibility", "hidden");
-		thatCrashInfo.attr("class", "hidden");
-	});*/
 	
 };
 
@@ -112,18 +95,13 @@ carOverlay.prototype.draw = function() {
 	div.style.top = y -height / 2 + 'px';
 	div.style.width = width + 'px';
 	div.style.height = height + 'px';
-	jQuery(this.div_).mouseover(function(){
-		alert("click");
-		jQuery(div).append("<div>A crash!!!</div>");
-	});
 	
 };
 
 carOverlay.prototype.onRemove = function() {
-	jQuery(this.div_).fadeOut(function(){
-		this.div_.parentNode.removeChild(this.div_);
-		this.div_ = null;
-	});
+	jQuery(this.div_).fadeOut();
+	this.div_.parentNode.removeChild(this.div_);
+	this.div_ = null;
 };
 carOverlay.prototype.hide = function() {
 	if (this.div_) {

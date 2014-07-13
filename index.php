@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html>
   <head>
@@ -103,8 +101,6 @@
     
         Date.prototype.getDOY = function() { var onejan = new Date(this.getFullYear(),0,1); return Math.ceil((this - onejan) / 86400000); }
 
-      
-
         function loadYear(){
             var year = $('#year').val();
             console.log('loadYear called with ' + year);
@@ -128,14 +124,11 @@
 
                     $("#slider").slider("value", index); 
                     loadDay(index);
-                    
                 }
             });   
-            
         }
 
         function loadDay(day_of_year) {
-
             console.log('loadDay called with ' + day_of_year);
 
             var results = [];
